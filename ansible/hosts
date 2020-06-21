@@ -1,0 +1,15 @@
+# This is the default ansible 'hosts' file.
+#
+
+## [dbservers]
+##
+## db01.intranet.mydomain.net
+## db02.intranet.mydomain.net
+## 10.25.1.56
+## 10.25.1.57
+
+[dbservers]
+dblocalhost ansible_connection=local
+dbmysql56 ansible_ssh_host=172.16.122.136
+dbmysql57 ansible_ssh_host=172.16.122.137
+dbmysql80 ansible_ssh_host=172.16.122.138

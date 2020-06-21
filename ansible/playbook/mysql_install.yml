@@ -1,0 +1,32 @@
+---
+- name: Percona for MySQL Standalone Installation
+  gather_facts: false
+  hosts: all
+  tasks:
+     - name: Transfering Percona for MySQL install script
+       copy: src=mysql_install/mysql_install.sh dest=/tmp mode=0777
+
+     - name: Transfering Percona for MySQL Configuration script
+       copy: src=mysql_install/mysql_install_config.sh dest=/tmp mode=0777
+
+     - name: Executing Percona for MySQL Instalation script
+       command: "sh /tmp/mysql_install.sh {{ mysql_version }}"
+       register: cmd_install
+     - debug: msg="{{ cmd_install.stdout_lines|replace('\\t',' ') }}"
+     - debug: msg="{{ cmd_install.stderr_lines|replace('\\t',' ') }}"
+
+     - name: Executing Percona for MySQL Configuration script
+       command: sh /tmp/mysql_install_config.sh
+       register: cmd_config
+     - debug: msg="{{ cmd_config.stdout_lines|replace('\\t',' ') }}"
+     - debug: msg="{{ cmd_config.stderr_lines|replace('\\t',' ') }}"
+
+     - name: Removing - Percona for MySQL install script
+       file:
+         path: /tmp/mysql_install.sh
+         state: absent
+
+     - name: Removing - Percona for MySQL config script
+       file:
+         path: /tmp/mysql_install_config.sh
+         state: absent
