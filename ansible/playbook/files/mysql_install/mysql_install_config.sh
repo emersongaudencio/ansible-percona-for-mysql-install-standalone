@@ -35,11 +35,11 @@ fi
 
 if [[ $NR_CPUS -gt 8 ]]
 then
- INNODB_INSTANCES=$NR_CPUS
+ INNODB_INSTANCES=16
  INNODB_WRITES=16
  INNODB_READS=16
  INNODB_MIN_IO=200
- INNODB_MAX_IO=800
+ INNODB_MAX_IO=2000
  TEMP_TABLE_SIZE='16M'
  NR_CONNECTIONS=1000
  NR_CONNECTIONS_USER=950
@@ -54,7 +54,7 @@ else
  INNODB_WRITES=8
  INNODB_READS=8
  INNODB_MIN_IO=200
- INNODB_MAX_IO=300
+ INNODB_MAX_IO=800
  TEMP_TABLE_SIZE='16M'
  NR_CONNECTIONS=500
  NR_CONNECTIONS_USER=450
@@ -80,12 +80,14 @@ default-authentication-plugin=mysql_native_password
 
 ### configs innodb cluster ######
 binlog_checksum=none
+binlog_order_commits=1
 enforce_gtid_consistency=on
 gtid_mode=on
 master_info_repository=TABLE
 relay_log_info_repository=TABLE
+relay_log_recovery=1
 transaction_write_set_extraction=XXHASH64
-#disabled_storage_engines = MyISAM,BLACKHOLE,FEDERATED,CSV,ARCHIVE
+#### MTS config ####
 slave_parallel_type=LOGICAL_CLOCK
 slave_preserve_commit_order=1
 slave_parallel_workers=4"
@@ -94,8 +96,13 @@ elif [ "$MYSQL_VERSION" == "57" ]; then
   CHARACTERSET="utf8"
   MYSQL_BLOCK="#### extra confs ####
 binlog_checksum=none
+binlog_order_commits=1
 enforce_gtid_consistency=on
 gtid_mode=on
+master_info_repository=TABLE
+relay_log_info_repository=TABLE
+relay_log_recovery=1
+transaction_write_set_extraction=XXHASH64
 #### tmp table storage engine ####
 internal_tmp_disk_storage_engine = MyISAM
 #### MTS config ####
@@ -110,6 +117,9 @@ else
 binlog_checksum=none
 enforce_gtid_consistency=on
 gtid_mode=on
+master_info_repository=TABLE
+relay_log_info_repository=TABLE
+relay_log_recovery=1
 "
 fi
 
@@ -144,6 +154,7 @@ innodb_open_files                       = 65536
 # logbin configs
 log-bin                                 = $DATA_LOG/mysql-bin
 binlog_format                           = ROW
+binlog_row_image                        = MINIMAL
 expire_logs_days                        = 5
 log_bin_trust_function_creators         = 1
 sync_binlog                             = 1
