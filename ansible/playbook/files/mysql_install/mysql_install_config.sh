@@ -75,7 +75,11 @@ TMP_DIR="/var/lib/mysql-tmp"
 if [ "$MYSQL_VERSION" == "80" ]; then
    COLLATION="utf8mb4_general_ci"
    CHARACTERSET="utf8mb4"
-   MYSQL_BLOCK="# native password auth
+   MYSQL_BLOCK="#### admin extra port ####
+admin_address = 127.0.0.1
+admin_port = 33306
+
+# native password auth
 default-authentication-plugin=mysql_native_password
 
 ### configs innodb cluster ######
@@ -109,6 +113,9 @@ internal_tmp_disk_storage_engine = MyISAM
 slave_parallel_type=LOGICAL_CLOCK
 slave_preserve_commit_order=1
 slave_parallel_workers=4
+#### admin extra port ####
+extra_port = 33306
+extra_max_connections = 100
 "
 else
   COLLATION="utf8_general_ci"
@@ -120,6 +127,9 @@ gtid_mode=on
 master_info_repository=TABLE
 relay_log_info_repository=TABLE
 relay_log_recovery=1
+#### admin extra port ####
+extra_port = 33306
+extra_max_connections = 100
 "
 fi
 
@@ -150,6 +160,10 @@ thread_cache_size                       = 300
 # files limits
 open_files_limit                        = 102400
 innodb_open_files                       = 65536
+
+# thread mode
+thread_handling                         = pool-of-threads
+thread_cache_size                       = 300
 
 # logbin configs
 log-bin                                 = $DATA_LOG/mysql-bin
