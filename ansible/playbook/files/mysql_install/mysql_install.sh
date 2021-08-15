@@ -134,11 +134,13 @@ if [[ $os_type == "rhel" ]]; then
        yum install https://repo.percona.com/yum/percona-release-latest.noarch.rpm -y
        percona-release setup -y ps80
        sed -ie 's/enabled=1/enabled=1\nmodule_hotfixes=1/g' /etc/yum.repos.d/percona-ps-80-release.repo
+       sed -ie 's/enabled = 1/enabled=1\nmodule_hotfixes=1/g' /etc/yum.repos.d/percona-ps-80-release.repo
        yum -y install percona-server-server percona-server-client percona-server-shared percona-server-shared-compat
      elif [[ "$MYSQL_VERSION" == "57" ]]; then
        yum install https://repo.percona.com/yum/percona-release-latest.noarch.rpm -y
        percona-release setup -y ps57
        sed -ie 's/enabled=1/enabled=1\nmodule_hotfixes=1/g' /etc/yum.repos.d/percona-ps-57-release.repo
+       sed -ie 's/enabled = 1/enabled=1\nmodule_hotfixes=1/g' /etc/yum.repos.d/percona-ps-57-release.repo
        yum -y install Percona-Server-client-$MYSQL_VERSION
        yum -y install Percona-Server-devel-$MYSQL_VERSION
        yum -y install Percona-Server-server-$MYSQL_VERSION
