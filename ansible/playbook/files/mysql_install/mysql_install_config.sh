@@ -87,10 +87,12 @@ binlog_checksum=none
 binlog_order_commits=1
 enforce_gtid_consistency=on
 gtid_mode=on
+gtid_executed_compression_period = 0
 session_track_gtids=OWN_GTID
 master_info_repository=TABLE
 relay_log_info_repository=TABLE
 relay_log_recovery=1
+innodb_parallel_read_threads = 8
 transaction_write_set_extraction=XXHASH64
 #### MTS config ####
 slave_parallel_type=LOGICAL_CLOCK
@@ -200,14 +202,16 @@ innodb_max_dirty_pages_pct              = 90
 innodb_max_dirty_pages_pct_lwm          = 10
 innodb_doublewrite                      = 1
 innodb_thread_concurrency               = 0
+innodb_adaptive_hash_index              = 0
+innodb_adaptive_flushing_lwm            = 30
 
 # innodb redologs
 innodb_log_file_size                    = 1G
 innodb_log_files_in_group               = 4
 
 # table configs
-table_open_cache                        = 16384
-table_definition_cache                  = 52428
+table_open_cache                        = 32768
+table_definition_cache                  = 32768
 max_heap_table_size                     = $TEMP_TABLE_SIZE
 tmp_table_size                          = $TEMP_TABLE_SIZE
 tmpdir                                  = $TMP_DIR

@@ -4,6 +4,8 @@ echo "BEGIN - [`date +%d/%m/%Y" "%H:%M:%S`]"
 echo "##############"
 echo "$1" > /tmp/MYSQL_VERSION
 MYSQL_VERSION=$(cat /tmp/MYSQL_VERSION)
+echo "$2" > /tmp/MYSQL_MINOR_VERSION
+MYSQL_MINOR_VERSION=$(cat /tmp/MYSQL_MINOR_VERSION)
 
 # os_type = rhel
 os_type=
@@ -110,7 +112,14 @@ if [[ $os_type == "rhel" ]]; then
   if [[ $os_version == "7" ]]; then
     if [ "$MYSQL_VERSION" == "80" ]; then
        yum install https://repo.percona.com/yum/percona-release-latest.noarch.rpm -y
-       percona-release setup -y ps80
+       if [ "$MYSQL_MINOR_VERSION" != "" ]; then
+          MYSQL_INSTALL_VERSION=pdps-$MYSQL_MINOR_VERSION
+          echo $MYSQL_INSTALL_VERSION
+        else
+          MYSQL_INSTALL_VERSION=ps80
+          echo $MYSQL_INSTALL_VERSION
+       fi
+       percona-release setup -y $MYSQL_INSTALL_VERSION
        yum -y install percona-server-server percona-server-client percona-server-shared percona-server-shared-compat
      elif [[ "$MYSQL_VERSION" == "57" ]]; then
        yum install https://repo.percona.com/yum/percona-release-latest.noarch.rpm -y
@@ -132,9 +141,20 @@ if [[ $os_type == "rhel" ]]; then
   elif [[ $os_version == "8" ]]; then
     if [ "$MYSQL_VERSION" == "80" ]; then
        yum install https://repo.percona.com/yum/percona-release-latest.noarch.rpm -y
-       percona-release setup -y ps80
-       sed -ie 's/enabled=1/enabled=1\nmodule_hotfixes=1/g' /etc/yum.repos.d/percona-ps-80-release.repo
-       sed -ie 's/enabled = 1/enabled=1\nmodule_hotfixes=1/g' /etc/yum.repos.d/percona-ps-80-release.repo
+       if [ "$MYSQL_MINOR_VERSION" != "" ]; then
+          MYSQL_INSTALL_VERSION=pdps-$MYSQL_MINOR_VERSION
+          echo $MYSQL_INSTALL_VERSION
+          percona-release setup -y $MYSQL_INSTALL_VERSION
+          PERCONA_REPO="percona-pdps-$MYSQL_INSTALL_VERSION-release.repo"
+          sed -ie 's/enabled=1/enabled=1\nmodule_hotfixes=1/g' /etc/yum.repos.d/$PERCONA_REPO
+          sed -ie 's/enabled = 1/enabled=1\nmodule_hotfixes=1/g' /etc/yum.repos.d/$PERCONA_REPO
+        else
+          MYSQL_INSTALL_VERSION=ps80
+          echo $MYSQL_INSTALL_VERSION
+          percona-release setup -y $MYSQL_INSTALL_VERSION
+          sed -ie 's/enabled=1/enabled=1\nmodule_hotfixes=1/g' /etc/yum.repos.d/percona-ps-80-release.repo
+          sed -ie 's/enabled = 1/enabled=1\nmodule_hotfixes=1/g' /etc/yum.repos.d/percona-ps-80-release.repo
+       fi
        yum -y install percona-server-server percona-server-client percona-server-shared percona-server-shared-compat
      elif [[ "$MYSQL_VERSION" == "57" ]]; then
        yum install https://repo.percona.com/yum/percona-release-latest.noarch.rpm -y
