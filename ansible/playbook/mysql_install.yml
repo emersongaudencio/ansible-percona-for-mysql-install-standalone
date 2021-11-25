@@ -10,7 +10,7 @@
        copy: src=mysql_install/mysql_install_config.sh dest=/tmp mode=0777
 
      - name: Executing Percona for MySQL Instalation script
-       command: "sh /tmp/mysql_install.sh {{ mysql_version }}"
+       command: "sh /tmp/mysql_install.sh {{ mysql_version }} {{ mysql_minor_version }}"
        register: cmd_install
      - debug: msg="{{ cmd_install.stdout_lines|replace('\\t',' ') }}"
      - debug: msg="{{ cmd_install.stderr_lines|replace('\\t',' ') }}"
