@@ -73,7 +73,7 @@ TMP_DIR="/var/lib/mysql-tmp"
 
 ### collation and character set ###
 if [ "$MYSQL_VERSION" == "80" ]; then
-   COLLATION="utf8mb4_general_ci"
+   COLLATION="utf8mb4_0900_ai_ci"
    CHARACTERSET="utf8mb4"
    MYSQL_BLOCK="#### admin extra port ####
 admin_address = 127.0.0.1
@@ -154,7 +154,7 @@ local_infile                            = 1
 datadir                                 = $DATA_DIR
 collation-server                        = $COLLATION
 character_set_server                    = $CHARACTERSET
-init-connect                            = SET NAMES $CHARACTERSET
+init-connect                            = 'SET NAMES $CHARACTERSET COLLATE $COLLATION'
 lower_case_table_names                  = 1
 default-storage-engine                  = InnoDB
 optimizer_switch                        = 'index_merge_intersection=off'
