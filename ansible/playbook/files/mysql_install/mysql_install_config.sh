@@ -92,12 +92,38 @@ session_track_gtids=OWN_GTID
 master_info_repository=TABLE
 relay_log_info_repository=TABLE
 relay_log_recovery=1
-innodb_parallel_read_threads = 8
 transaction_write_set_extraction=XXHASH64
 #### MTS config ####
 slave_parallel_type=LOGICAL_CLOCK
+binlog_transaction_dependency_tracking=WRITESET
 slave_preserve_commit_order=1
-slave_parallel_workers=8"
+slave_parallel_workers=8
+
+# parameter to fix adding strings collections over 10k per IN() clause / 0 for unlimited memory you can also give limit here in bytes like 8388608
+range_optimizer_max_mem_size=0
+
+# temp table mysql8
+temptable_max_ram = 2G
+internal-tmp-mem-storage-engine=MEMORY
+
+# skip any errors, enable only when re-syncing the slave database
+# slave-skip-errors=1062,1032
+
+# start the slave manually when MySQL server is started
+# skip-slave-start
+
+# database tables list replication setup
+# replicate-do-table=dbtest.users
+# replicate-do-table=dbtest.countries
+# replicate-do-table=dbtest.cities
+
+# database list replication setup
+# replicate-do-db=pdns
+
+# increment/offset variables master-master replication
+# auto_increment_increment = 2
+# auto_increment_offset = 1 or 2
+"
 elif [ "$MYSQL_VERSION" == "57" ]; then
   COLLATION="utf8_general_ci"
   CHARACTERSET="utf8"
@@ -159,20 +185,20 @@ lower_case_table_names                  = 1
 default-storage-engine                  = InnoDB
 optimizer_switch                        = 'index_merge_intersection=off'
 bulk_insert_buffer_size                 = 128M
-thread_cache_size                       = 300
+transaction-isolation                   = READ-COMMITTED
 
 # files limits
 open_files_limit                        = 102400
 innodb_open_files                       = 65536
 
-# thread mode
-thread_handling                         = pool-of-threads
-thread_cache_size                       = 300
+# thread mode (one-thread-per-connection/pool-of-threads)
+thread_handling                         = one-thread-per-connection
+thread_cache_size                       = $NR_CONNECTIONS_USER
 
-# logbin configs
+# logbin configs -  binlog_row_image (MINIMAL/FULL)
 log-bin                                 = $DATA_LOG/mysql-bin
 binlog_format                           = ROW
-binlog_row_image                        = MINIMAL
+binlog_row_image                        = FULL
 expire_logs_days                        = 5
 log_bin_trust_function_creators         = 1
 sync_binlog                             = 1
@@ -204,6 +230,8 @@ innodb_doublewrite                      = 1
 innodb_thread_concurrency               = 0
 innodb_adaptive_hash_index              = 0
 innodb_adaptive_flushing_lwm            = 30
+innodb_stats_persistent_sample_pages    = 100
+innodb_parallel_read_threads            = $INNODB_READS
 
 # innodb redologs
 innodb_log_file_size                    = 1G
@@ -237,8 +265,15 @@ $SORT_BLOCK
 # log configs
 slow_query_log                          = 1
 slow_query_log_file                     = $DATA_LOG/mysql-slow.log
-long_query_time                         = 3
-log_slow_admin_statements               = 1
+long_query_time                         = 1
+log_slow_admin_statements               = 0
+log_slow_slave_statements               = 0
+log_slow_rate_limit                     = 100
+log_slow_rate_type                      = 'query'
+slow_query_log_always_write_time        = 1
+log_slow_verbosity                      = 'full'
+slow_query_log_use_global_control       = 'all'
+userstat                                = ON
 
 log-error                               = $DATA_LOG/mysql-error.log
 
@@ -255,6 +290,7 @@ performance-schema-instrument           ='%=ON'
 performance-schema-consumer-events-stages-current=ON
 performance-schema-consumer-events-stages-history=ON
 performance-schema-consumer-events-stages-history-long=ON
+performance_schema_session_connect_attrs_size=768
 
 $MYSQL_BLOCK
 " > /etc/my.cnf
