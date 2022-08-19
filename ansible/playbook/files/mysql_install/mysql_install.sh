@@ -174,6 +174,7 @@ fi
 
 ### installation mysql add-ons via yum ####
 yum -y install perl-DBD-MySQL
+yum -y install jemalloc
 
 ####### PACKAGES ###########################
 if [[ $os_type == "rhel" ]]; then
@@ -282,6 +283,24 @@ echo 'LimitNOFILE=102400' >> /etc/systemd/system/mysqld.service.d/limits.conf
 echo '[Service]' > /etc/systemd/system/mysqld.service.d/timeout.conf
 echo 'TimeoutSec=28800' >> /etc/systemd/system/mysqld.service.d/timeout.conf
 systemctl daemon-reload
+
+#####  MYSQL MEMORY ALLOCATOR ###########################
+echo '[Service]' > /etc/systemd/system/mysqld.service.d/malloc.conf
+echo 'ExecStartPre=/bin/sh -c "systemctl unset-environment LD_PRELOAD"' >> /etc/systemd/system/mysqld.service.d/malloc.conf
+echo 'ExecStartPre=/bin/sh -c "systemctl set-environment LD_PRELOAD=/usr/lib64/libjemalloc.so.1"' >> /etc/systemd/system/mysqld.service.d/malloc.conf
+systemctl daemon-reload
+
+# disable transparent huge pages
+echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled" >> /etc/rc.d/rc.local
+echo "echo never > /sys/kernel/mm/transparent_hugepage/defrag" >> /etc/rc.d/rc.local
+chmod +x /etc/rc.d/rc.local
+
+if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
+  echo never > /sys/kernel/mm/transparent_hugepage/enabled
+fi
+if test -f /sys/kernel/mm/transparent_hugepage/defrag; then
+  echo never > /sys/kernel/mm/transparent_hugepage/defrag
+fi
 
 echo "##############"
 echo "END - [`date +%d/%m/%Y" "%H:%M:%S`]"
